@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dotcompliance.example/schemas/option1-ingest-payload.json",
+  "title": "Option 1 — webinar lead ingestion upsert payload",
+  "description": "One payload per registrant, upserted downstream. Upsert-on-key makes the pipeline idempotent (re-running the same export changes nothing). Required vs nullable is driven by the real data: name blank in 31/83, phone blank in 52/83.",
+  "type": "object",
+  "required": ["dedup_key", "object", "campaign_member", "_meta"],
+  "additionalProperties": false,
+  "properties": {
+    "dedup_key": {
+      "description": "Person identity = normalized email when an '@' is present; else a per-REGISTRATION surrogate (corporate-domain anchor + stable row hash) for contact-less rows. A bare domain is NEVER the key on its own: two distinct registrants can share it (e.g. vitalant.org) and an upsert on the shared key would destructively merge them, erasing signal. The corporate domain is kept separately in _meta.account_domain as a non-destructive account hint. Always present (every row gets a stable key -> idempotent re-ingest).",
+      "type": "string"
+    },
+    "object": {
+      "description": "Which Salesforce object(s) this row writes. The pipeline NEVER creates Accounts/Contacts (read-only for matching); those exist only at human conversion.",
+      "type": "string",
+      "enum": [
+        "Lead+CampaignMember",
+        "Lead(update)+CampaignMember",
+        "Lead(nurture)",
+        "Lead(review)",
+        "Task(Account)",
+        "staging",
+        "none"
+      ]
+    },
+    "lead": {
+      "description": "Person record. Null for contact-less rows (bare domain, no person) — those become an Account Task, not a Lead.",
+      "type": ["object", "null"],
+      "required": ["email", "lifecycle", "confidence_flag"],
+      "additionalProperties": false,
+      "properties": {
+        "email": {"type": ["string", "null"], "format": "email"},
+        "first_name": {"type": ["string", "null"]},
+        "last_name": {"type": ["string", "null"]},
+        "company": {"type": ["string", "null"], "description": "Lead.Company (text). Not an Account object — Account is created at conversion."},
+        "title": {"type": ["string", "null"]},
+        "phone_e164": {"type": ["string", "null"], "description": "E.164, written ONLY when trustworthy (quality ok/repaired); null otherwise, so a rep never dials a bad number. The raw value + quality flag are retained in _meta (phone_raw/phone_quality) — nulling the CRM field is not discarding data. Region hint = the ISO country column, never the email TLD."},
+        "country_iso": {"type": ["string", "null"], "pattern": "^[A-Z]{2}$"},
+        "lifecycle": {
+          "type": "string",
+          "description": "Hint from the file, resolved against Salesforce (SOR wins). Both-blank defaults to Lead.",
+          "enum": ["Lead", "MQL", "Customer"]
+        },
+        "owner": {"type": ["string", "null"], "description": "Resolved owner or queue/pod. For net-new, SF round-robin sets the final rep."},
+        "confidence_flag": {
+          "type": "string",
+          "description": "Categorical, derived from the match path (not a fabricated numeric score); downgraded by failed email verification.",
+          "enum": ["high", "medium", "low"]
+        },
+        "routing_situation": {
+          "type": ["string", "null"],
+          "description": "Stamped by the pipeline; a Salesforce flow reads it on assignment to fire the right task.",
+          "enum": ["contact_less_inspect", "high_intent_fast_track", "needs_manual_qual", "net_new_enriched", null]
+        }
+      }
+    },
+    "campaign_member": {
+      "description": "Webinar attendance. Unique on (person + webinar_id) -> idempotent; re-ingest never duplicates.",
+      "type": "object",
+      "required": ["webinar_id"],
+      "additionalProperties": false,
+      "properties": {
+        "webinar_id": {"type": "string"},
+        "registration_time": {"type": ["string", "null"], "format": "date-time"},
+        "attended": {"type": ["string", "null"]},
+        "time_in_session_min": {"type": ["string", "number", "null"]},
+        "source_event": {"type": ["string", "null"]}
+      }
+    },
+    "intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "level": {
+          "type": "string",
+          "description": "keyword = a hit on the brief's content-trap term set (validate AI QMS / Veeva / MasterControl / replace) -> elevated to Priority Tier 1; none = no trap term. On this data: 1 hit in 83 — our measured count on the file, not a figure the brief states — the 'validate AI QMS' evaluation question; 0 competitor/displacement mentions. The matched term(s) are in `keywords`, from which the competitor-vs-evaluation type is read. Topical AI interest without a trap term is NOT escalated.",
+          "enum": ["keyword", "none"]
+        },
+        "keywords": {"type": ["string", "null"]},
+        "text": {"type": ["string", "null"]}
+      }
+    },
+    "_meta": {
+      "description": "Operational metadata. Stays in the audit log / output CSV — NOT pushed to Salesforce, except confidence_flag (rep-facing). Provisioning any custom SF field is a documented deploy step.",
+      "type": "object",
+      "required": ["match_status"],
+      "additionalProperties": false,
+      "properties": {
+        "match_status": {
+          "type": "string",
+          "enum": [
+            "customer_suppress", "open_opp", "owner_exists", "account_matched",
+            "account_matched_contactless", "icp_netnew", "icp_contactless",
+            "non_icp", "other_review", "no_match"
+          ]
+        },
+        "enrichment_status": {"type": "string", "enum": ["not_needed", "pending", "success", "failed"]},
+        "destination_type": {"type": "string", "enum": ["CS_AM", "AE", "existing_owner", "account_owner", "bdr_pod", "nurture", "review_queue", "manual_queue"]},
+        "consent_status": {"type": "string", "description": "Lawful-basis gate (matters: the buyer sells compliance). Source = registration form/CRM, not this export.", "enum": ["granted", "denied", "unknown"]},
+        "account_domain": {"type": ["string", "null"], "description": "Corporate domain for account-level aggregation (a non-destructive hint). Null for consumer/no-domain rows. NEVER used as a merge key."},
+        "shared_domain_collision": {"type": "boolean", "description": "True when >=2 contact-less rows share this corporate domain — distinct registrants that must not be merged; routed to human review."},
+        "company_conflict": {"type": ["boolean", "null"], "description": "Detector: on a contact-less corporate-bare row, True = the email domain and Organization name different companies (the rigged file's poison column) -> confidence downgraded to low, human review. False = they corroborate. Null = not applicable (named row, consumer/no domain, or blank/junk Organization). A detector, NOT a resolver: we never pick the 'true' company (the shuffle destroyed it)."},
+        "org_junk": {"type": "boolean", "description": "True when a non-blank Organization yields no usable company-name token (e.g. a phone number in the org field, row 81: '8123255522'). The field is then ignored for domain corroboration (company_conflict is null) AND as an enrichment company hint; the flag records the org was junk, not merely absent. Bright line = all-digits (str.isdigit), never a 'real name?' judgment (that is the resolver this build refuses). Audit-only, never a Salesforce field."},
+        "phone_quality": {"type": "string", "description": "Phone normalization outcome. ok/repaired = trustworthy E.164 (written to SF); repaired = a deterministic trunk-prefix fix was applied (e.g. AU parenthetical '(02)'). no_country_code/junk/too_short/blank = not written to SF (null), raw kept in phone_raw; an absent dial on an ICP row rides the enrichment loop. The flag lives here in the audit record, NOT as a Salesforce custom field.", "enum": ["ok", "repaired", "no_country_code", "junk", "too_short", "blank"]},
+        "phone_raw": {"type": ["string", "null"], "description": "The original phone string as it arrived (pre-normalization), retained for traceability so nulling the CRM field never destroys source data."}
+      }
+    }
+  }
+}

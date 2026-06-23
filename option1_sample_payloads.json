@@ -1,0 +1,253 @@
+[
+  {
+    "dedup_key": "akroll@ncsu.edu",
+    "object": "Lead(nurture)",
+    "lead": {
+      "email": "akroll@ncsu.edu",
+      "first_name": "Adrianne",
+      "last_name": "Kroll",
+      "company": "NCSU Industry Extension Services",
+      "title": "Assistant Director of Quality",
+      "phone_e164": "+17572774303",
+      "country_iso": "US",
+      "lifecycle": "Lead",
+      "owner": "Marketing nurture",
+      "confidence_flag": "medium",
+      "routing_situation": null
+    },
+    "campaign_member": {
+      "webinar_id": "webinar-2026-05-gxp-ai",
+      "registration_time": "2026-05-28T14:10:00",
+      "attended": "No",
+      "time_in_session_min": null,
+      "source_event": "Blog & Nurturing List Email 1"
+    },
+    "intent": {
+      "level": "none",
+      "keywords": null,
+      "text": null
+    },
+    "_meta": {
+      "match_status": "non_icp",
+      "enrichment_status": "not_needed",
+      "destination_type": "nurture",
+      "consent_status": "unknown",
+      "account_domain": "ncsu.edu",
+      "shared_domain_collision": false,
+      "company_conflict": null,
+      "org_junk": false,
+      "phone_quality": "ok",
+      "phone_raw": "7572774303"
+    }
+  },
+  {
+    "dedup_key": "turner.alec1992@gmail.com",
+    "object": "none",
+    "lead": {
+      "email": "turner.alec1992@gmail.com",
+      "first_name": "Alec",
+      "last_name": "Turner",
+      "company": "Multipack solutions",
+      "title": "Director of Quality",
+      "phone_e164": "+18644943380",
+      "country_iso": "US",
+      "lifecycle": "Customer",
+      "owner": "CS/AM queue",
+      "confidence_flag": "high",
+      "routing_situation": null
+    },
+    "campaign_member": {
+      "webinar_id": "webinar-2026-05-gxp-ai",
+      "registration_time": "2026-06-04T11:18:00",
+      "attended": "No",
+      "time_in_session_min": null,
+      "source_event": "Product Ad"
+    },
+    "intent": {
+      "level": "none",
+      "keywords": null,
+      "text": null
+    },
+    "_meta": {
+      "match_status": "customer_suppress",
+      "enrichment_status": "not_needed",
+      "destination_type": "CS_AM",
+      "consent_status": "unknown",
+      "account_domain": null,
+      "shared_domain_collision": false,
+      "company_conflict": null,
+      "org_junk": false,
+      "phone_quality": "ok",
+      "phone_raw": "8644943380"
+    }
+  },
+  {
+    "dedup_key": "alexander.dmoch@noctua.care",
+    "object": "Lead+CampaignMember",
+    "lead": {
+      "email": "alexander.dmoch@noctua.care",
+      "first_name": "Alexander",
+      "last_name": "Dmoch",
+      "company": "Noctua Care",
+      "title": "cofounder",
+      "phone_e164": null,
+      "country_iso": "FR",
+      "lifecycle": "Lead",
+      "owner": "BDR pod [FR / size-pending]",
+      "confidence_flag": "medium",
+      "routing_situation": "net_new_enriched"
+    },
+    "campaign_member": {
+      "webinar_id": "webinar-2026-05-gxp-ai",
+      "registration_time": "2026-06-03T11:21:00",
+      "attended": "No",
+      "time_in_session_min": null,
+      "source_event": "Blog & Nurturing List Email 2"
+    },
+    "intent": {
+      "level": "none",
+      "keywords": null,
+      "text": null
+    },
+    "_meta": {
+      "match_status": "icp_netnew",
+      "enrichment_status": "pending",
+      "destination_type": "bdr_pod",
+      "consent_status": "unknown",
+      "account_domain": "noctua.care",
+      "shared_domain_collision": false,
+      "company_conflict": null,
+      "org_junk": false,
+      "phone_quality": "blank",
+      "phone_raw": null
+    }
+  },
+  {
+    "dedup_key": "acromax.com.do|bd64f24ee99f",
+    "object": "staging",
+    "lead": null,
+    "campaign_member": {
+      "webinar_id": "webinar-2026-05-gxp-ai",
+      "registration_time": "2026-05-26T16:06:00",
+      "attended": "Yes",
+      "time_in_session_min": "60",
+      "source_event": "LinkedIn Post 1"
+    },
+    "intent": {
+      "level": "none",
+      "keywords": null,
+      "text": null
+    },
+    "_meta": {
+      "match_status": "other_review",
+      "enrichment_status": "not_needed",
+      "destination_type": "review_queue",
+      "consent_status": "unknown",
+      "account_domain": "acromax.com.do",
+      "shared_domain_collision": false,
+      "company_conflict": true,
+      "org_junk": false,
+      "phone_quality": "blank",
+      "phone_raw": null
+    }
+  },
+  {
+    "dedup_key": "alk.net|46754d3645d3",
+    "object": "staging",
+    "lead": null,
+    "campaign_member": {
+      "webinar_id": "webinar-2026-05-gxp-ai",
+      "registration_time": "2026-05-26T19:34:00",
+      "attended": "Yes",
+      "time_in_session_min": "22",
+      "source_event": "LinkedIn Post 1"
+    },
+    "intent": {
+      "level": "none",
+      "keywords": null,
+      "text": null
+    },
+    "_meta": {
+      "match_status": "icp_contactless",
+      "enrichment_status": "pending",
+      "destination_type": "manual_queue",
+      "consent_status": "unknown",
+      "account_domain": "alk.net",
+      "shared_domain_collision": false,
+      "company_conflict": true,
+      "org_junk": false,
+      "phone_quality": "blank",
+      "phone_raw": null
+    }
+  },
+  {
+    "dedup_key": "staging|56b8053d59a7",
+    "object": "staging",
+    "lead": null,
+    "campaign_member": {
+      "webinar_id": "webinar-2026-05-gxp-ai",
+      "registration_time": "2026-05-29T04:24:00",
+      "attended": "Yes",
+      "time_in_session_min": "60",
+      "source_event": "Blog & Nurturing List Email 1"
+    },
+    "intent": {
+      "level": "none",
+      "keywords": null,
+      "text": null
+    },
+    "_meta": {
+      "match_status": "no_match",
+      "enrichment_status": "not_needed",
+      "destination_type": "manual_queue",
+      "consent_status": "unknown",
+      "account_domain": null,
+      "shared_domain_collision": false,
+      "company_conflict": null,
+      "org_junk": false,
+      "phone_quality": "blank",
+      "phone_raw": null
+    }
+  },
+  {
+    "dedup_key": "lisa.sorensen@cynosure.com",
+    "object": "Lead(update)+CampaignMember",
+    "lead": {
+      "email": "lisa.sorensen@cynosure.com",
+      "first_name": "Lisa",
+      "last_name": "Sorensen",
+      "company": "Cynosure Lutronic",
+      "title": "Senior QMS Engineer",
+      "phone_e164": "+13037172983",
+      "country_iso": "US",
+      "lifecycle": "Lead",
+      "owner": "Ryan Daley",
+      "confidence_flag": "high",
+      "routing_situation": null
+    },
+    "campaign_member": {
+      "webinar_id": "webinar-2026-05-gxp-ai",
+      "registration_time": "2026-06-08T15:25:00",
+      "attended": "No",
+      "time_in_session_min": null,
+      "source_event": "BDR Email 1"
+    },
+    "intent": {
+      "level": "none",
+      "keywords": null,
+      "text": null
+    },
+    "_meta": {
+      "match_status": "owner_exists",
+      "enrichment_status": "not_needed",
+      "destination_type": "existing_owner",
+      "consent_status": "unknown",
+      "account_domain": "cynosure.com",
+      "shared_domain_collision": false,
+      "company_conflict": null,
+      "org_junk": false,
+      "phone_quality": "ok",
+      "phone_raw": "3037172983"
+    }
+  }
+]
