@@ -14,7 +14,7 @@ One dataset exposed the problem; the two builds are the fix.
 ## Option 1 — Ingestion Pipeline
 *(Built and runnable — every number below is a real run on the actual 83-row file; the code is in the appendix.)*
 
-### The finding (open the room with this)
+### The finding 
 We built the brief's content trap — all four terms (*validate AI QMS / Veeva / MasterControl / replace*) scanned across the three free-text columns for all 83 registrants — and it fires **exactly once** (our measured count on the file; the brief lists the four terms but states no count of its own). That one hit is *"How to validate AI QMS"*: a genuine **evaluation** question, **not** a competitor or replacement mention (those score zero). And, tellingly, it comes from a **contact-less row** (bare domain `vitalant.org`, no name), so we can't even cleanly act on the one real signal. **Self-report intent at ~1/83 is noise.** That's not a complaint about the data — it's the argument: Option 1 is the hygiene/routing layer that gets clean records into Salesforce; the pipeline that *generates* intent (Option 2) has to run on a different signal source.
 
 ### What Option 1 is, plainly
