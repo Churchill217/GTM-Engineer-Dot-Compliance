@@ -180,6 +180,44 @@ CALLING_CODE = {
 }
 
 
+# Country -> ISO alias map. On THIS file the `Country/Region` ISO column is already
+# clean, canonical and uppercase (all 83 rows), so normalize_country() is a no-op
+# pass-through here. It is in the code on purpose: the moment a second source sends
+# a free-text country ("United States", "USA", "U.S.") instead of an ISO code, that
+# value must collapse to the SAME code or geo routing fragments silently. Same
+# decision as the phone path — normalize at the edge, never trust raw free text.
+COUNTRY_ALIAS = {
+    "united states": "US", "usa": "US", "u.s.": "US", "u.s.a.": "US",
+    "united kingdom": "GB", "uk": "GB", "great britain": "GB",
+    "germany": "DE", "deutschland": "DE",
+    "france": "FR", "canada": "CA", "australia": "AU", "israel": "IL",
+    # extend as new sources introduce free-text country values
+}
+
+
+def normalize_country(value: str | None, iso_value: str | None = None) -> str | None:
+    """Return a 2-letter ISO country code, or None if nothing usable / no recognized
+    mapping is present.
+
+    Prefers the clean ISO column when it carries a value (canonical on this data,
+    so this branch is a no-op pass-through that only normalizes case). Falls back to
+    alias-normalizing a free-text country NAME for any future source that sends one.
+    Decision: geography is read from the country field, NEVER inferred from the email
+    TLD (see normalize_phone) — this function is the single place that hardening lives.
+    """
+    iso = (iso_value or "").strip()
+    if iso:
+        return iso.upper()
+    name = (value or "").strip()
+    if not name:
+        return None
+    # An unmapped free-text name is NOT an ISO code, so we never emit it into
+    # country_iso (that would fragment geo routing — the exact failure this guards).
+    # Known aliases collapse to canonical ISO; anything else returns None and the row
+    # rides manual/enrichment review until the alias map is extended.
+    return COUNTRY_ALIAS.get(name.lower())
+
+
 # --------------------------------------------------------------------------- #
 # EXTERNAL INTEGRATION BOUNDARIES — swap these stub bodies for live API clients
 # in production. They return NOTHING here (no live org/API) and NEVER fabricate
@@ -429,7 +467,7 @@ def route(row: dict) -> dict:
       rung 4   manual queue (no usable identity)
     """
     lifecycle_file = (row.get("Lead/MQL") or "").strip() or None
-    iso = (row.get("Country/Region") or "").strip()
+    iso = normalize_country(row.get("Country/Region Name"), iso_value=row.get("Country/Region"))
     # Phone: normalize once here. Salesforce gets a dial ONLY when it's
     # trustworthy (ok/repaired); everything else writes null so a rep never dials a
     # bad number. The raw + quality flag are retained in the audit record (phone_raw
@@ -645,7 +683,7 @@ def build_payload(row: dict, d: dict) -> dict:
         "company": (row.get("Organization") or "").strip() or None,
         "title": (row.get("Job Title") or "").strip() or None,
         "phone_e164": d["phone_e164"],   # trustworthy dial only (else null); computed once in route()
-        "country_iso": (row.get("Country/Region") or "").strip() or None,
+        "country_iso": normalize_country(row.get("Country/Region Name"), iso_value=row.get("Country/Region")),
         "lifecycle": d["lifecycle_resolved"],
         "owner": d["destination_owner"],
         "confidence_flag": d["confidence"],
